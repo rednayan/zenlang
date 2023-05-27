@@ -79,7 +79,8 @@ struct Scanner {
 impl Scanner {
     fn new(source: String) -> Self {
         let lines = source.split("\n").collect::<Vec<&str>>();
-        let token_list = scan_token(&lines);
+        let mut token_list = scan_token(&lines);
+        token_list.push(Token::new(TokenType::EOF, " ".to_string(), lines.len()));
         Self { source, token_list }
     }
 }
@@ -87,30 +88,102 @@ impl Scanner {
 fn scan_token(lines: &Vec<&str>) -> Vec<Token> {
     let mut token: Vec<Token> = Vec::new();
     for (k, v) in lines.into_iter().enumerate() {
-        for i in v.chars() {
-            match i.to_string().as_str() {
-                "(" => token.push(Token::new(TokenType::LEFT_PAREN, i.to_string(), k + 1)),
-                ")" => token.push(Token::new(TokenType::RIGHTPAREN, i.to_string(), k + 1)),
-                "{" => token.push(Token::new(TokenType::LEFTBRACE, i.to_string(), k + 1)),
-                "}" => token.push(Token::new(TokenType::RIGHTBRACE, i.to_string(), k + 1)),
-                "," => token.push(Token::new(TokenType::COMMA, i.to_string(), k + 1)),
-                "." => token.push(Token::new(TokenType::DOT, i.to_string(), k + 1)),
-                "-" => token.push(Token::new(TokenType::MINUS, i.to_string(), k + 1)),
-                "+" => token.push(Token::new(TokenType::PLUS, i.to_string(), k + 1)),
-                ";" => token.push(Token::new(TokenType::SEMICOLON, i.to_string(), k + 1)),
-                "*" => token.push(Token::new(TokenType::STAR, i.to_string(), k + 1)),
-                "!" => token.push(Token::new(TokenType::BANG, i.to_string(), k + 1)),
-                "!=" => token.push(Token::new(TokenType::BANGEQUAL, i.to_string(), k + 1)),
-                "=" => token.push(Token::new(TokenType::EQUAL, i.to_string(), k + 1)),
-                "==" => token.push(Token::new(TokenType::EQUALEQUAL, i.to_string(), k + 1)),
-                "<" => token.push(Token::new(TokenType::LESS, i.to_string(), k + 1)),
-                "<=" => token.push(Token::new(TokenType::LESSEQUAL, i.to_string(), k + 1)),
-                ">" => token.push(Token::new(TokenType::GREATER, i.to_string(), k + 1)),
-                ">=" => token.push(Token::new(TokenType::GREATEREQUAL, i.to_string(), k + 1)),
+        let char_array: Vec<_> = v.chars().collect();
+        let mut current: usize = 0;
+        while char_array.len() > current {
+            match char_array[current].to_string().as_str() {
+                "(" => token.push(Token::new(
+                    TokenType::LEFT_PAREN,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                ")" => token.push(Token::new(
+                    TokenType::RIGHTPAREN,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                "{" => token.push(Token::new(
+                    TokenType::LEFTBRACE,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                "}" => token.push(Token::new(
+                    TokenType::RIGHTBRACE,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                "," => token.push(Token::new(
+                    TokenType::COMMA,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                "." => token.push(Token::new(
+                    TokenType::DOT,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                "-" => token.push(Token::new(
+                    TokenType::MINUS,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                "+" => token.push(Token::new(
+                    TokenType::PLUS,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                ";" => token.push(Token::new(
+                    TokenType::SEMICOLON,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                "*" => token.push(Token::new(
+                    TokenType::STAR,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                "!" => {
+                    current += 1;
+                    if char_array[current].to_string() == "=".to_string() {
+                        token.push(Token::new(
+                            TokenType::BANGEQUAL,
+                            format!(
+                                "{}{}",
+                                char_array[current - 1].to_string(),
+                                char_array[current].to_string()
+                            ),
+                            k + 1,
+                        ))
+                    }
+                    token.push(Token::new(
+                        TokenType::BANG,
+                        char_array[current].to_string(),
+                        k + 1,
+                    ))
+                }
+                "=" => token.push(Token::new(
+                    TokenType::EQUAL,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                "<" => token.push(Token::new(
+                    TokenType::LESS,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
+                ">" => token.push(Token::new(
+                    TokenType::GREATER,
+                    char_array[current].to_string(),
+                    k + 1,
+                )),
                 _ => {
-                    eprintln!("ERROR: unexpected character {}", i.to_string());
+                    eprintln!(
+                        "ERROR: unexpected character {}",
+                        char_array[current].to_string()
+                    );
                 }
             }
+            current += 1;
         }
     }
     token
