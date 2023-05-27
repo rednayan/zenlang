@@ -2,7 +2,7 @@ use std::{env, error::Error, fmt, fs, io, path::Path};
 
 #[derive(Debug)]
 enum TokenType {
-    LEFT_PAREN,
+    LEFTPAREN,
     RIGHTPAREN,
     LEFTBRACE,
     RIGHTBRACE,
@@ -93,7 +93,7 @@ fn scan_token(lines: &Vec<&str>) -> Vec<Token> {
         while char_array.len() > current {
             match char_array[current].to_string().as_str() {
                 "(" => token.push(Token::new(
-                    TokenType::LEFT_PAREN,
+                    TokenType::LEFTPAREN,
                     char_array[current].to_string(),
                     k + 1,
                 )),
@@ -161,11 +161,25 @@ fn scan_token(lines: &Vec<&str>) -> Vec<Token> {
                         k + 1,
                     ))
                 }
-                "=" => token.push(Token::new(
-                    TokenType::EQUAL,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
+                "=" => {
+                    current += 1;
+                    if char_array[current].to_string() == "=".to_string() {
+                        token.push(Token::new(
+                            TokenType::EQUALEQUAL,
+                            format!(
+                                "{}{}",
+                                char_array[current - 1].to_string(),
+                                char_array[current].to_string()
+                            ),
+                            k + 1,
+                        ))
+                    }
+                    token.push(Token::new(
+                        TokenType::EQUAL,
+                        char_array[current].to_string(),
+                        k + 1,
+                    ))
+                }
                 "<" => token.push(Token::new(
                     TokenType::LESS,
                     char_array[current].to_string(),
