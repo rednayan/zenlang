@@ -87,30 +87,28 @@ impl Scanner {
 fn scan_token(lines: &Vec<&str>) -> Vec<Token> {
     let mut token: Vec<Token> = Vec::new();
     for (k, v) in lines.into_iter().enumerate() {
-        for i in v.split(" ").collect::<Vec<_>>().into_iter() {
-            match i {
-                "(" => token.push(Token::new(TokenType::LEFT_PAREN, i.to_string(), k)),
-                ")" => token.push(Token::new(TokenType::RIGHTPAREN, i.to_string(), k)),
-                "{" => token.push(Token::new(TokenType::LEFTBRACE, i.to_string(), k)),
-                "}" => token.push(Token::new(TokenType::RIGHTBRACE, i.to_string(), k)),
-                "," => token.push(Token::new(TokenType::COMMA, i.to_string(), k)),
-                "." => token.push(Token::new(TokenType::DOT, i.to_string(), k)),
-                "-" => token.push(Token::new(TokenType::MINUS, i.to_string(), k)),
-                "+" => token.push(Token::new(TokenType::PLUS, i.to_string(), k)),
-                ";" => token.push(Token::new(TokenType::SEMICOLON, i.to_string(), k)),
-                "*" => token.push(Token::new(TokenType::STAR, i.to_string(), k)),
-                " " => token.push(Token::new(TokenType::EOF, i.to_string(), k)),
-                "!" => token.push(Token::new(TokenType::BANG, i.to_string(), k)),
-                "!=" => token.push(Token::new(TokenType::BANGEQUAL, i.to_string(), k)),
-                "=" => token.push(Token::new(TokenType::EQUAL, i.to_string(), k)),
-                "==" => token.push(Token::new(TokenType::EQUALEQUAL, i.to_string(), k)),
-                "<" => token.push(Token::new(TokenType::LESS, i.to_string(), k)),
-                "<=" => token.push(Token::new(TokenType::LESSEQUAL, i.to_string(), k)),
-                ">" => token.push(Token::new(TokenType::GREATER, i.to_string(), k)),
-                ">=" => token.push(Token::new(TokenType::GREATEREQUAL, i.to_string(), k)),
+        for i in v.chars() {
+            match i.to_string().as_str() {
+                "(" => token.push(Token::new(TokenType::LEFT_PAREN, i.to_string(), k + 1)),
+                ")" => token.push(Token::new(TokenType::RIGHTPAREN, i.to_string(), k + 1)),
+                "{" => token.push(Token::new(TokenType::LEFTBRACE, i.to_string(), k + 1)),
+                "}" => token.push(Token::new(TokenType::RIGHTBRACE, i.to_string(), k + 1)),
+                "," => token.push(Token::new(TokenType::COMMA, i.to_string(), k + 1)),
+                "." => token.push(Token::new(TokenType::DOT, i.to_string(), k + 1)),
+                "-" => token.push(Token::new(TokenType::MINUS, i.to_string(), k + 1)),
+                "+" => token.push(Token::new(TokenType::PLUS, i.to_string(), k + 1)),
+                ";" => token.push(Token::new(TokenType::SEMICOLON, i.to_string(), k + 1)),
+                "*" => token.push(Token::new(TokenType::STAR, i.to_string(), k + 1)),
+                "!" => token.push(Token::new(TokenType::BANG, i.to_string(), k + 1)),
+                "!=" => token.push(Token::new(TokenType::BANGEQUAL, i.to_string(), k + 1)),
+                "=" => token.push(Token::new(TokenType::EQUAL, i.to_string(), k + 1)),
+                "==" => token.push(Token::new(TokenType::EQUALEQUAL, i.to_string(), k + 1)),
+                "<" => token.push(Token::new(TokenType::LESS, i.to_string(), k + 1)),
+                "<=" => token.push(Token::new(TokenType::LESSEQUAL, i.to_string(), k + 1)),
+                ">" => token.push(Token::new(TokenType::GREATER, i.to_string(), k + 1)),
+                ">=" => token.push(Token::new(TokenType::GREATEREQUAL, i.to_string(), k + 1)),
                 _ => {
-                    eprintln!("{}", i.to_string());
-                    panic!("ERROR: unexpected character, lexer failed")
+                    eprintln!("ERROR: unexpected character {}", i.to_string());
                 }
             }
         }
@@ -147,6 +145,6 @@ fn read_from_file(x: String) -> Result<(), Box<dyn Error>> {
     let file_path = Path::new(x.as_str());
     let file_content = fs::read_to_string(file_path)?;
     let tokens = Scanner::new(file_content);
-    println!("{tokens:?}");
+    println!("{tokens:#?}");
     Ok(())
 }
