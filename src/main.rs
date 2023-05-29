@@ -2,25 +2,26 @@ use std::{env, error::Error, fmt, fs, io, path::Path};
 
 #[derive(Debug)]
 enum TokenType {
-    LEFTPAREN,
-    RIGHTPAREN,
-    LEFTBRACE,
-    RIGHTBRACE,
-    COMMA,
-    DOT,
-    MINUS,
-    PLUS,
-    SEMICOLON,
+    LEFTPAREN,    //
+    RIGHTPAREN,   //
+    LEFTBRACE,    //
+    RIGHTBRACE,   //
+    COMMA,        //
+    DOT,          //
+    MINUS,        //
+    PLUS,         //
+    SEMICOLON,    //
+    STAR,         //
+    BANG,         //
+    BANGEQUAL,    //
+    EQUAL,        //
+    EQUALEQUAL,   //
+    GREATER,      //
+    GREATEREQUAL, //
+    LESS,         //
+    LESSEQUAL,    //
+    EOF,          //
     SLASH,
-    STAR,
-    BANG,
-    BANGEQUAL,
-    EQUAL,
-    EQUALEQUAL,
-    GREATER,
-    GREATEREQUAL,
-    LESS,
-    LESSEQUAL,
     IDENTIFIER,
     STRING,
     NUMBER,
@@ -40,7 +41,6 @@ enum TokenType {
     TRUE,
     VAR,
     WHILE,
-    EOF,
 }
 
 impl fmt::Display for TokenType {
@@ -180,20 +180,66 @@ fn scan_token(lines: &Vec<&str>) -> Vec<Token> {
                         k + 1,
                     ))
                 }
-                "<" => token.push(Token::new(
-                    TokenType::LESS,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                ">" => token.push(Token::new(
-                    TokenType::GREATER,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
+                "<" => {
+                    current += 1;
+                    if char_array[current].to_string() == "=".to_string() {
+                        token.push(Token::new(
+                            TokenType::LESSEQUAL,
+                            format!(
+                                "{}{}",
+                                char_array[current - 1].to_string(),
+                                char_array[current].to_string()
+                            ),
+                            k + 1,
+                        ))
+                    }
+                    token.push(Token::new(
+                        TokenType::EQUAL,
+                        char_array[current].to_string(),
+                        k + 1,
+                    ))
+                }
+
+                ">" => {
+                    current += 1;
+                    if char_array[current].to_string() == "=".to_string() {
+                        token.push(Token::new(
+                            TokenType::GREATEREQUAL,
+                            format!(
+                                "{}{}",
+                                char_array[current - 1].to_string(),
+                                char_array[current].to_string()
+                            ),
+                            k + 1,
+                        ))
+                    }
+                    token.push(Token::new(
+                        TokenType::GREATER,
+                        char_array[current].to_string(),
+                        k + 1,
+                    ))
+                }
+
+                "/" => {
+                    current += 1;
+                    if char_array[current].to_string() == "/".to_string() {
+                        while char_array[current].to_string() != "\n".to_string() {
+                            current += 1;
+                            println!("{}", char_array[current]);
+                        }
+                    } else {
+                        token.push(Token::new(
+                            TokenType::SLASH,
+                            char_array[current].to_string(),
+                            k + 1,
+                        ))
+                    }
+                }
+
                 _ => {
                     eprintln!(
                         "ERROR: unexpected character {}",
-                        char_array[current].to_string()
+                        char_array[current].to_string(),
                     );
                 }
             }
