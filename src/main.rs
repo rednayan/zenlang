@@ -1,3 +1,4 @@
+//48
 use std::{env, error::Error, fmt, fs, io, path::Path};
 
 #[derive(Debug)]
@@ -78,175 +79,179 @@ struct Scanner {
 
 impl Scanner {
     fn new(source: String) -> Self {
-        let lines = source.split("\n").collect::<Vec<&str>>();
-        let mut token_list = scan_token(&lines);
-        token_list.push(Token::new(TokenType::EOF, " ".to_string(), lines.len()));
+        let mut token_list: Vec<Token> = scan_token(&source);
+        token_list.push(Token::new(
+            TokenType::EOF,
+            " ".to_string(),
+            token_list.len(),
+        ));
         Self { source, token_list }
     }
 }
 
-fn scan_token(lines: &Vec<&str>) -> Vec<Token> {
+fn scan_token(source: &String) -> Vec<Token> {
     let mut token: Vec<Token> = Vec::new();
-    for (k, v) in lines.into_iter().enumerate() {
-        let char_array: Vec<_> = v.chars().collect();
-        let mut current: usize = 0;
-        while char_array.len() > current {
-            match char_array[current].to_string().as_str() {
-                "(" => token.push(Token::new(
-                    TokenType::LEFTPAREN,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                ")" => token.push(Token::new(
-                    TokenType::RIGHTPAREN,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                "{" => token.push(Token::new(
-                    TokenType::LEFTBRACE,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                "}" => token.push(Token::new(
-                    TokenType::RIGHTBRACE,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                "," => token.push(Token::new(
-                    TokenType::COMMA,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                "." => token.push(Token::new(
-                    TokenType::DOT,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                "-" => token.push(Token::new(
-                    TokenType::MINUS,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                "+" => token.push(Token::new(
-                    TokenType::PLUS,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                ";" => token.push(Token::new(
-                    TokenType::SEMICOLON,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                "*" => token.push(Token::new(
-                    TokenType::STAR,
-                    char_array[current].to_string(),
-                    k + 1,
-                )),
-                "!" => {
-                    current += 1;
-                    if char_array[current].to_string() == "=".to_string() {
-                        token.push(Token::new(
-                            TokenType::BANGEQUAL,
-                            format!(
-                                "{}{}",
-                                char_array[current - 1].to_string(),
-                                char_array[current].to_string()
-                            ),
-                            k + 1,
-                        ))
-                    }
+    let char_array: Vec<_> = source.chars().collect();
+    let mut current: usize = 0;
+    let mut line = 1;
+    while char_array.len() > current {
+        match char_array[current].to_string().as_str() {
+            "(" => token.push(Token::new(
+                TokenType::LEFTPAREN,
+                char_array[current].to_string(),
+                line,
+            )),
+            ")" => token.push(Token::new(
+                TokenType::RIGHTPAREN,
+                char_array[current].to_string(),
+                line,
+            )),
+            "{" => token.push(Token::new(
+                TokenType::LEFTBRACE,
+                char_array[current].to_string(),
+                line,
+            )),
+            "}" => token.push(Token::new(
+                TokenType::RIGHTBRACE,
+                char_array[current].to_string(),
+                line,
+            )),
+            "," => token.push(Token::new(
+                TokenType::COMMA,
+                char_array[current].to_string(),
+                line,
+            )),
+            "." => token.push(Token::new(
+                TokenType::DOT,
+                char_array[current].to_string(),
+                line,
+            )),
+            "-" => token.push(Token::new(
+                TokenType::MINUS,
+                char_array[current].to_string(),
+                line,
+            )),
+            "+" => token.push(Token::new(
+                TokenType::PLUS,
+                char_array[current].to_string(),
+                line,
+            )),
+            ";" => token.push(Token::new(
+                TokenType::SEMICOLON,
+                char_array[current].to_string(),
+                line,
+            )),
+            "*" => token.push(Token::new(
+                TokenType::STAR,
+                char_array[current].to_string(),
+                line,
+            )),
+            "!" => {
+                current += 1;
+                if char_array[current].to_string() == "=".to_string() {
                     token.push(Token::new(
-                        TokenType::BANG,
-                        char_array[current].to_string(),
-                        k + 1,
+                        TokenType::BANGEQUAL,
+                        format!(
+                            "{}{}",
+                            char_array[current - 1].to_string(),
+                            char_array[current].to_string()
+                        ),
+                        1,
                     ))
                 }
-                "=" => {
-                    current += 1;
-                    if char_array[current].to_string() == "=".to_string() {
-                        token.push(Token::new(
-                            TokenType::EQUALEQUAL,
-                            format!(
-                                "{}{}",
-                                char_array[current - 1].to_string(),
-                                char_array[current].to_string()
-                            ),
-                            k + 1,
-                        ))
-                    }
+                token.push(Token::new(
+                    TokenType::BANG,
+                    char_array[current - 1].to_string(),
+                    line,
+                ))
+            }
+            "=" => {
+                current += 1;
+                if char_array[current].to_string() == "=".to_string() {
                     token.push(Token::new(
-                        TokenType::EQUAL,
-                        char_array[current].to_string(),
-                        k + 1,
+                        TokenType::EQUALEQUAL,
+                        format!(
+                            "{}{}",
+                            char_array[current - 1].to_string(),
+                            char_array[current].to_string()
+                        ),
+                        line,
                     ))
                 }
-                "<" => {
-                    current += 1;
-                    if char_array[current].to_string() == "=".to_string() {
-                        token.push(Token::new(
-                            TokenType::LESSEQUAL,
-                            format!(
-                                "{}{}",
-                                char_array[current - 1].to_string(),
-                                char_array[current].to_string()
-                            ),
-                            k + 1,
-                        ))
-                    }
+                token.push(Token::new(
+                    TokenType::EQUAL,
+                    char_array[current].to_string(),
+                    line,
+                ))
+            }
+            "<" => {
+                current += 1;
+                if char_array[current].to_string() == "=".to_string() {
                     token.push(Token::new(
-                        TokenType::EQUAL,
-                        char_array[current].to_string(),
-                        k + 1,
+                        TokenType::LESSEQUAL,
+                        format!(
+                            "{}{}",
+                            char_array[current - 1].to_string(),
+                            char_array[current].to_string()
+                        ),
+                        line,
                     ))
                 }
+                token.push(Token::new(
+                    TokenType::EQUAL,
+                    char_array[current].to_string(),
+                    line,
+                ))
+            }
 
-                ">" => {
-                    current += 1;
-                    if char_array[current].to_string() == "=".to_string() {
-                        token.push(Token::new(
-                            TokenType::GREATEREQUAL,
-                            format!(
-                                "{}{}",
-                                char_array[current - 1].to_string(),
-                                char_array[current].to_string()
-                            ),
-                            k + 1,
-                        ))
-                    }
+            ">" => {
+                current += 1;
+                if char_array[current].to_string() == "=".to_string() {
                     token.push(Token::new(
-                        TokenType::GREATER,
-                        char_array[current].to_string(),
-                        k + 1,
+                        TokenType::GREATEREQUAL,
+                        format!(
+                            "{}{}",
+                            char_array[current - 1].to_string(),
+                            char_array[current].to_string()
+                        ),
+                        line,
                     ))
                 }
+                token.push(Token::new(
+                    TokenType::GREATER,
+                    char_array[current].to_string(),
+                    line,
+                ))
+            }
 
-                "/" => {
-                    current += 1;
-                    if char_array[current].to_string() == "/".to_string() {
-                        while char_array[current].to_string() != "\n".to_string() {
-                            current += 1;
-                            println!("{}", char_array[current]);
-                        }
-                    } else {
-                        token.push(Token::new(
-                            TokenType::SLASH,
-                            char_array[current].to_string(),
-                            k + 1,
-                        ))
+            "/" => {
+                current += 1;
+                if char_array[current].to_string() == "/".to_string() {
+                    while char_array[current].to_string() != "\n".to_string() {
+                        current += 1;
+                        println!("{}", char_array[current]);
                     }
-                }
-
-                _ => {
-                    eprintln!(
-                        "ERROR: unexpected character {}",
-                        char_array[current].to_string(),
-                    );
+                } else {
+                    token.push(Token::new(
+                        TokenType::SLASH,
+                        char_array[current - 1].to_string(),
+                        line,
+                    ))
                 }
             }
-            current += 1;
+            "\n" => {
+                line += 1;
+            }
+            _ => {
+                eprintln!(
+                    "ERROR: unexpected character {}",
+                    char_array[current].to_string(),
+                );
+            }
         }
+        current += 1;
     }
-    token
+    return token;
 }
 
 fn main() {
