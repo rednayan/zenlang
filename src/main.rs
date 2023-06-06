@@ -94,7 +94,9 @@ fn scan_token(source: &String) -> Vec<Token> {
     let char_array: Vec<_> = source.chars().collect();
     let mut current: usize = 0;
     let mut line = 1;
+    println!("{char_array:?}");
     while char_array.len() > current {
+        println!("{}:{}", char_array[current], current);
         match char_array[current].to_string().as_str() {
             "(" => token.push(Token::new(
                 TokenType::LEFTPAREN,
@@ -216,12 +218,13 @@ fn scan_token(source: &String) -> Vec<Token> {
                         ),
                         line,
                     ))
+                } else {
+                    token.push(Token::new(
+                        TokenType::GREATER,
+                        char_array[current].to_string(),
+                        line,
+                    ))
                 }
-                token.push(Token::new(
-                    TokenType::GREATER,
-                    char_array[current].to_string(),
-                    line,
-                ))
             }
 
             "/" => {
@@ -240,7 +243,10 @@ fn scan_token(source: &String) -> Vec<Token> {
                 }
             }
             "\n" => {
-                line += 1;
+                // line += 1;
+            }
+            " " => {
+                // current += 1;
             }
             _ => {
                 eprintln!(
